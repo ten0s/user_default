@@ -93,11 +93,18 @@ etv(Title) ->
 %% ===================================================================
 
 -type reg_name() :: atom().
--spec pid_do(pid() | reg_name(), fun((pid()) -> any())) -> any().
-pid_do(Pid, Fun) when is_pid(Pid) ->
-	Fun(Pid);
-pid_do(RegName, Fun) when is_atom(RegName), RegName =/= undefined ->
-	Pid = whereis(RegName),
+-type process() :: pid() | reg_name() | pos_integer().
+-spec pid_do(process(), fun((pid()) -> any())) -> any().
+pid_do(Process, Fun) when is_integer(Process) ->
+	try c:pid(0, Process, 0) of
+		Pid -> pid_do(Pid, Fun)
+	catch
+		_:_ -> pid_do(bad_pid, Fun)
+	end;
+pid_do(Process, Fun) when is_pid(Process) ->
+	Fun(Process);
+pid_do(Process, Fun) when is_atom(Process), Process =/= undefined ->
+	Pid = whereis(Process),
 	pid_do(Pid, Fun);
 pid_do(_, _) ->
 	io:format("Invalid process~n").
@@ -106,22 +113,22 @@ pid_do(_, _) ->
 %% Process status
 %% ===================================================================
 
--spec status(pid() | reg_name()) -> any().
-status(PidOrRegName) ->
-	pid_do(PidOrRegName, fun sys:get_status/1).
+-spec status(process()) -> any().
+status(Process) ->
+	pid_do(Process, fun sys:get_status/1).
 
 %% ===================================================================
 %% Kill process
 %% ===================================================================
 
 -type reason() :: term().
--spec kill(pid() | reg_name(), reason()) -> any().
-kill(PidOrRegName, Reason) ->
-	pid_do(PidOrRegName, fun(Pid) -> erlang:exit(Pid, Reason) end).
+-spec kill(process(), reason()) -> any().
+kill(Process, Reason) ->
+	pid_do(Process, fun(Pid) -> erlang:exit(Pid, Reason) end).
 
--spec kill(pid() | reg_name()) -> any().
-kill(PidOrRegName) ->
-	kill(PidOrRegName, kill).
+-spec kill(pid() | reg_name() | pos_integer()) -> any().
+kill(Process) ->
+	kill(Process, kill).
 
 %% ===================================================================
 %% OS command
