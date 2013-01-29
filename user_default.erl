@@ -115,7 +115,12 @@ pid_do(_, _) ->
 
 -spec status(process()) -> any().
 status(Process) ->
-	pid_do(Process, fun sys:get_status/1).
+	pid_do(Process,
+		fun(Pid) ->
+			Status = sys:get_status(Pid),
+			io:format("~p~n", [Status])
+		end
+	).
 
 %% ===================================================================
 %% Kill process
