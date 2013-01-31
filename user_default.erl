@@ -14,6 +14,7 @@
 -export([status/1]).
 -export([kill/1, kill/2]).
 -export([os/1]).
+-export([lager/1]).
 
 -compile(inline).
 
@@ -142,3 +143,10 @@ kill(Process) ->
 os(Command) ->
 	Res = os:cmd(Command),
 	io:format("~s~n", [Res]).
+
+%% ===================================================================
+%% Lager
+%% ===================================================================
+
+lager(Level) ->
+	lager:set_loglevel(lager_console_backend, Level).
