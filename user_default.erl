@@ -12,6 +12,7 @@
 -export([etv/1]).
 
 -export([status/1]).
+-export([state/1]).
 -export([kill/1, kill/2]).
 -export([os/1]).
 -export([lager/1]).
@@ -108,20 +109,50 @@ pid_do(Process, Fun) when is_atom(Process), Process =/= undefined ->
 	Pid = whereis(Process),
 	pid_do(Pid, Fun);
 pid_do(_, _) ->
-	io:format("Invalid process~n").
+	io:format("error: invalid process~n").
 
 %% ===================================================================
-%% Process status
+%% Process status/state
 %% ===================================================================
 
 -spec status(process()) -> any().
 status(Process) ->
 	pid_do(Process,
 		fun(Pid) ->
-			Status = sys:get_status(Pid),
-			io:format("~p~n", [Status])
+			try sys:get_status(Pid) of
+				Status ->
+					io:format("~p~n", [Status])
+			catch
+				Exc:Err ->
+					io:format("~p: ~p~n", [Exc, Err])
+			end
 		end
 	).
+
+-spec state(process()) -> any().
+state(Process) ->
+	pid_do(Process,
+		fun(Pid) ->
+			try sys:get_status(Pid) of
+				Status ->
+					case fetch_state(Status) of
+						{ok, State} ->
+							io:format("~p~n", [State]);
+						{error, Error} ->
+							io:format("error: ~p~n", [Error])
+					end
+			catch
+				Exc:Err ->
+					io:format("~p: ~p~n", [Exc, Err])
+			end
+
+		end
+	).
+
+fetch_state({status,_,{module,gen_server},[_,_,_,_,[_,_,{data,[{"State", State}]}]]}) ->
+	{ok, State};
+fetch_state(_) ->
+	{error, not_implemented}.
 
 %% ===================================================================
 %% Kill process
