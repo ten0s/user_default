@@ -11,8 +11,8 @@
 -export([etv/0]).
 -export([etv/1]).
 
--export([status/1]).
--export([state/1]).
+-export([status/1, status/2]).
+-export([state/1, state/2]).
 -export([kill/1, kill/2]).
 -export([os/1]).
 -export([lager/1]).
@@ -117,11 +117,20 @@ pid_do(_, _) ->
 
 -spec status(process()) -> any().
 status(Process) ->
+	status(Process, print).
+
+-spec status(process(), fetch | print) -> any().
+status(Process, Action) ->
 	pid_do(Process,
 		fun(Pid) ->
 			try sys:get_status(Pid) of
 				Status ->
-					io:format("~p~n", [Status])
+					case Action of
+						fetch ->
+							Status;
+						print ->
+							io:format("~p~n", [Status])
+					end
 			catch
 				Exc:Err ->
 					io:format("~p: ~p~n", [Exc, Err])
@@ -131,13 +140,22 @@ status(Process) ->
 
 -spec state(process()) -> any().
 state(Process) ->
+	state(Process, print).
+
+-spec state(process(), fetch | print) -> any().
+state(Process, Action) ->
 	pid_do(Process,
 		fun(Pid) ->
 			try sys:get_status(Pid) of
 				Status ->
 					case fetch_state(Status) of
 						{ok, State} ->
-							io:format("~p~n", [State]);
+							case Action of
+								fetch ->
+									State;
+								print ->
+									print_state(State)
+							end;
 						{error, Error} ->
 							io:format("error: ~p~n", [Error])
 					end
@@ -149,8 +167,18 @@ state(Process) ->
 		end
 	).
 
-fetch_state({status,_,{module,gen_server},[_,_,_,_,[_,_,{data,[{"State", State}]}]]}) ->
-	{ok, State};
+print_state({data, State}) ->
+	io:format("~p~n", [State]);
+print_state({data, StateName, StateData}) ->
+	io:format("~p~n~p~n", [StateName, StateData]).
+
+fetch_state({status,_,{module,gen_server},[_,_,_,_,[_,_,{data,Data}]]}) ->
+	State = proplists:get_value("State", Data),
+	{ok, {data, State}};
+fetch_state({status,_,{module,gen_fsm},[_,_,_,_,[_,{data,Data1},{data,Data2}]]}) ->
+	StateName = proplists:get_value("StateName", Data1),
+	StateData = proplists:get_value("StateData", Data2),
+	{ok, {data, StateName, StateData}};
 fetch_state(_) ->
 	{error, not_implemented}.
 
