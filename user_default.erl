@@ -14,6 +14,7 @@
 -export([status/1, status/2]).
 -export([state/1, state/2]).
 -export([kill/1, kill/2]).
+-export([pi/1, pi/2]).
 -export([os/1]).
 -export([lager/1]).
 
@@ -112,7 +113,7 @@ pid_do(_, _) ->
 	io:format("error: invalid process~n").
 
 %% ===================================================================
-%% Process status/state
+%% Process status/state/info
 %% ===================================================================
 
 -spec status(process()) -> any().
@@ -181,6 +182,30 @@ fetch_state({status,_,{module,gen_fsm},[_,_,_,_,[_,{data,Data1},{data,Data2}]]})
 	{ok, {data, StateName, StateData}};
 fetch_state(_) ->
 	{error, not_implemented}.
+
+-spec pi(process()) -> any().
+pi(Process) ->
+	pi(Process, print).
+
+-spec pi(process(), fetch | print) -> any().
+pi(Process, Action) ->
+	pid_do(Process,
+		fun(Pid) ->
+			try process_info(Pid) of
+				Info ->
+					case Action of
+						fetch ->
+							Info;
+						print ->
+							io:format("~p~n", [Info])
+					end
+			catch
+				Exc:Err ->
+					io:format("~p: ~p~n", [Exc, Err])
+			end
+
+		end
+	).
 
 %% ===================================================================
 %% Kill process
