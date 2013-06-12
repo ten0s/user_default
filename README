@@ -7,6 +7,5 @@ $ cp user_default.erl ~/.ebin
 3. Compile user_default.erl
 $ erlc ~/.ebin/user_default.erl
 
-4. Insert into .erlang
-true = code:add_pathz("/home/USERNAME/.ebin").
-{module, user_default} = code:load_abs("/home/USERNAME/.ebin/user_default").
+4. Update into .erlang
+$ echo -e "true = code:add_pathz(\"$HOME/.ebin\").\n{module, user_default} = code:load_abs(\"$HOME/.ebin/user_default\")." >> .erlang
