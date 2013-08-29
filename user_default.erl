@@ -7,6 +7,7 @@
 -export([dbg/2]).
 -export([dbg/3]).
 -export([dbg/4]).
+-export([ii/1]).
 
 -export([etv/0]).
 -export([etv/1]).
@@ -234,3 +235,15 @@ os(Command) ->
 
 lager(Level) ->
 	lager:set_loglevel(lager_console_backend, Level).
+
+%% ===================================================================
+%% Interpreter overrides
+%% ===================================================================
+
+ii(Module) when is_atom(Module) ->
+	ModInfo = Module:module_info(),
+	ModSrc = proplists:get_value(source,
+		proplists:get_value(compile, ModInfo)),
+	i:ii(ModSrc);
+ii(Module) ->
+	i:ii(Module).
