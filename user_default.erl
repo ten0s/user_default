@@ -16,6 +16,7 @@
 -export([state/1, state/2]).
 -export([kill/1, kill/2]).
 -export([pi/1, pi/2]).
+-export([mql/0]).
 -export([os/1]).
 -export([lager/1]).
 
@@ -205,6 +206,11 @@ pi(Process, Action) ->
 
 		end).
 
+-spec mql() -> any().
+mql() ->
+	lists:reverse(lists:sort([
+		{process_info(P, message_queue_len), P} || P <- processes()
+	])).
 
 %% ===================================================================
 %% Kill process
