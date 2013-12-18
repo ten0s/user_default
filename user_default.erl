@@ -137,8 +137,7 @@ status(Process, Action) ->
 				Exc:Err ->
 					io:format("~p: ~p~n", [Exc, Err])
 			end
-		end
-	).
+		end).
 
 -spec state(process()) -> any().
 state(Process) ->
@@ -166,8 +165,7 @@ state(Process, Action) ->
 					io:format("~p: ~p~n", [Exc, Err])
 			end
 
-		end
-	).
+		end).
 
 print_state({data, State}) ->
 	io:format("~p~n", [State]);
@@ -205,8 +203,8 @@ pi(Process, Action) ->
 					io:format("~p: ~p~n", [Exc, Err])
 			end
 
-		end
-	).
+		end).
+
 
 %% ===================================================================
 %% Kill process
