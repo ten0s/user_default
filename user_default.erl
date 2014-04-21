@@ -19,6 +19,7 @@
 -export([mql/0]).
 -export([os/1]).
 -export([lager/1]).
+-export([start_app/1]).
 
 -compile(inline).
 
@@ -251,3 +252,25 @@ ii(Module) when is_atom(Module) ->
 	i:ii(ModSrc);
 ii(Module) ->
 	i:ii(Module).
+
+%% ===================================================================
+%% Automatic application loader
+%% ===================================================================
+
+-spec start_app(Application::atom()) -> ok | {error, term()}.
+start_app(Application) ->
+    case application:start(Application) of
+        ok ->
+            ok;
+        {error, {not_started, Dependency}} ->
+            case start_app(Dependency) of
+                ok ->
+                    start_app(Application);
+                Error ->
+                    Error
+            end;
+        {error, {already_started, Application}} ->
+            ok;
+        Error ->
+            Error
+    end.
