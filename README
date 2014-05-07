@@ -1,11 +1,4 @@
-1. Create .ebin directory
-$ mkdir ~/.ebin
-
-2. Copy user_default.erl to ~/.ebin
-$ cp user_default.erl ~/.ebin
-
-3. Compile user_default.erl
-$ erlc ~/.ebin/user_default.erl
-
-4. Update into .erlang
-$ echo -e "true = code:add_pathz(\"$HOME/.ebin\").\n{module, user_default} = code:load_abs(\"$HOME/.ebin/user_default\")." >> .erlang
+mkdir -p ~/.ebin
+wget https://raw.githubusercontent.com/ten0s/user_default/master/user_default.erl -P ~/.ebin
+erlc  -o ~/.ebin ~/.ebin/user_default.erl
+echo -e "true = code:add_pathz(\"$HOME/.ebin\").\n{module, user_default} = code:load_abs(\"$HOME/.ebin/user_default\")." >> .erlang
