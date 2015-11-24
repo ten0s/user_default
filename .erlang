@@ -1,0 +1,16 @@
+true = code:add_pathz("/home/ten0s/.ebin").
+{module, user_default} = code:load_abs("/home/ten0s/.ebin/user_default").
+Paths = filelib:wildcard("/home/ten0s/.erlang_libs/*/ebin").
+Paths2 = Paths ++ ["/opt/r16b03-1/lib/debugger-3.2.12/ebin"].
+%io:format("~p~n", [Paths]).
+lists:foreach(
+   fun(Path) ->
+      true = code:add_pathz(Path),
+      Beams = filelib:wildcard(filename:join(Path, "*.beam")),
+      %io:format("~p~n", [Beams]),
+      lists:foreach(
+         fun(Beam) ->
+            BeamMod = filename:rootname(Beam, ".beam"),
+            {module, _} = code:load_abs(BeamMod)
+         end, Beams)
+   end, Paths2).
