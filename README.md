@@ -1,6 +1,12 @@
 <pre>
-mkdir -p ~/.ebin
-wget --no-check-certificate https://raw.githubusercontent.com/ten0s/user_default/master/user_default.erl -P ~/.ebin
-erlc  -o ~/.ebin ~/.ebin/user_default.erl
-echo -e "true = code:add_pathz(\"$HOME/.ebin\").\n{module, user_default} = code:load_abs(\"$HOME/.ebin/user_default\")." >> ~/.erlang
+mkdir -p ~/.ebin ~/.erlang_libs
+
+cd ~/projects
+git clone git@github.com:ten0s/user_default.git
+cd user_default
+
+erlc user_default.erl
+
+cp user_default.beam ~/.ebin/
+cp dot_erlang ~/.erlang
 </pre>
