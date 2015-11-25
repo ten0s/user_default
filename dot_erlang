@@ -1,8 +1,19 @@
+StdAppPath = fun(App) ->
+  ErlLib = "/opt/r18.1/lib/",
+  [Path|_] = filelib:wildcard([ErlLib, App, "-*/ebin"]),
+  Path
+end.
+%io:format("~p~n", [StdAppPath("debugger")]).
+
 true = code:add_pathz("/home/ten0s/.ebin").
 {module, user_default} = code:load_abs("/home/ten0s/.ebin/user_default").
 Paths = filelib:wildcard("/home/ten0s/.erlang_libs/*/ebin").
-Paths2 = Paths ++ ["/opt/r18.1/lib/debugger-4.1.1/ebin"].
-%io:format("~p~n", [Paths]).
+Paths2 = Paths ++ [
+  StdAppPath("debugger"),
+  StdAppPath("observer"),
+  StdAppPath("wx")
+].
+%io:format("~p~n", [Paths2]).
 lists:foreach(
    fun(Path) ->
       true = code:add_pathz(Path),
