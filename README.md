@@ -1,3 +1,5 @@
+See https://github.com/ten0s/dotfiles/blob/master/tasks/erl.yml for detail
+
 <pre>
 mkdir -p ~/.erl_libs/ebin
 
