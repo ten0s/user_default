@@ -1,13 +1,14 @@
 StdAppPath = fun(App) ->
-  ErlLib = "/opt/r18.1/lib/",
+  ErlLib = "/opt/r18.2/lib/",
   [Path|_] = filelib:wildcard([ErlLib, App, "-*/ebin"]),
   Path
 end.
 %io:format("~p~n", [StdAppPath("debugger")]).
 
-true = code:add_pathz("/home/ten0s/.ebin").
-{module, user_default} = code:load_abs("/home/ten0s/.ebin/user_default").
-Paths = filelib:wildcard("/home/ten0s/.erlang_libs/*/ebin").
+true = code:add_pathz("/home/ten0s/.erl_libs/ebin").
+{module, user_default} = code:load_abs("/home/ten0s/.erl_lib/ebin/user_default").
+
+Paths = filelib:wildcard("/home/ten0s/.erl_libs/*/ebin").
 Paths2 = Paths ++ [
   StdAppPath("debugger"),
   StdAppPath("observer"),
