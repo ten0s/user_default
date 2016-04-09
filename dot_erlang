@@ -1,5 +1,5 @@
 StdAppPath = fun(App) ->
-  ErlLib = "/opt/r18.2/lib/",
+  ErlLib = "/opt/r18.3/lib/",
   [Path|_] = filelib:wildcard([ErlLib, App, "-*/ebin"]),
   Path
 end.
