@@ -12,14 +12,11 @@
 -export([etv/0]).
 -export([etv/1]).
 
--export([status/1, status/2]).
--export([state/1, state/2]).
 -export([kill/1, kill/2]).
 -export([pi/1, pi/2]).
 -export([mql/0]).
 -export([os/1]).
 -export([lager/1]).
--export([start_app/1]).
 
 -compile(inline).
 
@@ -116,86 +113,21 @@ pid_do(_, _) ->
 	io:format("error: invalid process~n").
 
 %% ===================================================================
-%% Process status/state/info
+%% Process info
 %% ===================================================================
-
--spec status(process()) -> any().
-status(Process) ->
-	status(Process, print).
-
--spec status(process(), fetch | print) -> any().
-status(Process, Action) ->
-	pid_do(Process,
-		fun(Pid) ->
-			try sys:get_status(Pid) of
-				Status ->
-					case Action of
-						fetch ->
-							Status;
-						print ->
-							io:format("~p~n", [Status])
-					end
-			catch
-				Exc:Err ->
-					io:format("~p: ~p~n", [Exc, Err])
-			end
-		end).
-
--spec state(process()) -> any().
-state(Process) ->
-	state(Process, print).
-
--spec state(process(), fetch | print) -> any().
-state(Process, Action) ->
-	pid_do(Process,
-		fun(Pid) ->
-			try sys:get_status(Pid) of
-				Status ->
-					case fetch_state(Status) of
-						{ok, State} ->
-							case Action of
-								fetch ->
-									State;
-								print ->
-									print_state(State)
-							end;
-						{error, Error} ->
-							io:format("error: ~p~n", [Error])
-					end
-			catch
-				Exc:Err ->
-					io:format("~p: ~p~n", [Exc, Err])
-			end
-
-		end).
-
-print_state({data, State}) ->
-	io:format("~p~n", [State]);
-print_state({data, StateName, StateData}) ->
-	io:format("~p~n~p~n", [StateName, StateData]).
-
-fetch_state({status,_,{module,gen_server},[_,_,_,_,[_,_,{data,Data}]]}) ->
-	State = proplists:get_value("State", Data),
-	{ok, {data, State}};
-fetch_state({status,_,{module,gen_fsm},[_,_,_,_,[_,{data,Data1},{data,Data2}]]}) ->
-	StateName = proplists:get_value("StateName", Data1),
-	StateData = proplists:get_value("StateData", Data2),
-	{ok, {data, StateName, StateData}};
-fetch_state(_) ->
-	{error, not_implemented}.
 
 -spec pi(process()) -> any().
 pi(Process) ->
 	pi(Process, print).
 
--spec pi(process(), fetch | print) -> any().
-pi(Process, Action) ->
+-spec pi(process(), return | print) -> any().
+pi(Process, Action) when Action =:= return; Action =:= print ->
 	pid_do(Process,
 		fun(Pid) ->
 			try process_info(Pid) of
 				Info ->
 					case Action of
-						fetch ->
+						return ->
 							Info;
 						print ->
 							io:format("~p~n", [Info])
@@ -252,25 +184,3 @@ ii(Module) when is_atom(Module) ->
 	i:ii(ModSrc);
 ii(Module) ->
 	i:ii(Module).
-
-%% ===================================================================
-%% Automatic application loader
-%% ===================================================================
-
--spec start_app(Application::atom()) -> ok | {error, term()}.
-start_app(Application) ->
-    case application:start(Application) of
-        ok ->
-            ok;
-        {error, {not_started, Dependency}} ->
-            case start_app(Dependency) of
-                ok ->
-                    start_app(Application);
-                Error ->
-                    Error
-            end;
-        {error, {already_started, Application}} ->
-            ok;
-        Error ->
-            Error
-    end.
