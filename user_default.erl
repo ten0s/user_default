@@ -18,6 +18,8 @@
 -export([os/1]).
 -export([lager/1]).
 
+-export([rw/2]).
+
 -compile(inline).
 
 help() ->
@@ -184,3 +186,69 @@ ii(Module) when is_atom(Module) ->
 	i:ii(ModSrc);
 ii(Module) ->
 	i:ii(Module).
+
+%% ===================================================================
+%% shell_default additions
+%% ===================================================================
+
+%% from /opt/r19.3/lib/stdlib-3.3/src/shell.erl
+-define(CHAR_MAX, 60).
+-define(RECORDS, shell_records).
+
+pp(V, I, D, RT) ->
+    Strings =
+        case application:get_env(stdlib, shell_strings) of
+            {ok, false} ->
+                false;
+            _ ->
+                true
+        end,
+    io_lib_pretty:print(V, ([{column, I}, {line_length, columns()},
+                             {depth, D}, {max_chars, ?CHAR_MAX},
+                             {strings, Strings},
+                             {record_print_fun, record_print_fun(RT)}]
+                            ++ enc())).
+
+columns() ->
+    case io:columns() of
+        {ok,N} -> N;
+        _ -> 80
+    end.
+
+enc() ->
+    case lists:keyfind(encoding, 1, io:getopts()) of
+	false -> [{encoding,latin1}]; % should never happen
+	Enc -> [Enc]
+    end.
+
+record_print_fun(RT) ->
+    fun(Tag, NoFields) ->
+            case ets:lookup(RT, Tag) of
+                [{_,{attribute,_,record,{Tag,Fields}}}]
+                                  when length(Fields) =:= NoFields ->
+                    record_fields(Fields);
+                _ ->
+                    no
+            end
+    end.
+
+record_fields([{record_field,_,{atom,_,Field}} | Fs]) ->
+    [Field | record_fields(Fs)];
+record_fields([{record_field,_,{atom,_,Field},_} | Fs]) ->
+    [Field | record_fields(Fs)];
+record_fields([{typed_record_field,Field,_Type} | Fs]) ->
+    record_fields([Field | Fs]);
+record_fields([]) ->
+    [].
+%% from /opt/r19.3/lib/stdlib-3.3/src/shell.erl
+
+records_table() ->
+    catch lists:foldl(fun (T, Acc) ->
+        case proplists:get_value(name, ets:info(T)) of
+        ?RECORDS -> throw({ok, T});
+        _ -> Acc end
+    end, error, ets:all()).
+
+rw(File, Term) ->
+    Cs = pp(Term, _Column=1, _Depth=-1, records_table()),
+    file:write_file(File, Cs).
