@@ -250,5 +250,6 @@ records_table() ->
     end, error, ets:all()).
 
 rw(File, Term) ->
-    Cs = pp(Term, _Column=1, _Depth=-1, records_table()),
+    {ok, RT} = records_table(),
+    Cs = pp(Term, _Column=1, _Depth=-1, RT),
     file:write_file(File, Cs).
