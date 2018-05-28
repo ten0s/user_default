@@ -1,7 +1,5 @@
 -module(user_default).
 
--include("docsh_user_default.hrl").
-
 -export([help/0]).
 
 -export([dbg/0]).
@@ -21,6 +19,8 @@
 -export([lager/1]).
 
 -export([rw/2]).
+
+-include_lib("docsh/include/docsh_user_default.hrl").
 
 -compile(inline).
 
