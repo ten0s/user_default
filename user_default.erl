@@ -1,5 +1,7 @@
 -module(user_default).
 
+-include("docsh_user_default.hrl").
+
 -export([help/0]).
 
 -export([dbg/0]).
