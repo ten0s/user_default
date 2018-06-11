@@ -20,8 +20,6 @@
 
 -export([rw/2]).
 
--include_lib("docsh/include/docsh_user_default.hrl").
-
 -compile(inline).
 
 help() ->

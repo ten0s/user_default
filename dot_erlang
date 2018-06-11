@@ -24,10 +24,5 @@ lists:foreach(
          end, Beams)
    end, Paths).
 
-{module, docsh} = code:ensure_loaded(docsh).
-docsh:activated(path).
-
 true = code:add_pathz("/home/ten0s/.erl_libs/ebin").
 {module, user_default} = code:load_abs("/home/ten0s/.erl_libs/ebin/user_default").
-
-docsh:activated(user_default).
