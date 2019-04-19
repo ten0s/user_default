@@ -5,7 +5,8 @@ StdAppPath = fun(App) ->
 end.
 %io:format("~p~n", [StdAppPath("debugger")]).
 
-Paths = filelib:wildcard("/home/ten0s/.erl_libs/*/ebin") ++ [
+Paths = filelib:wildcard("/home/ten0s/.erl_libs/*/_build/*/lib/*/ebin") ++
+        filelib:wildcard("/home/ten0s/.erl_libs/*/ebin") ++ [
   StdAppPath("debugger"),
   StdAppPath("observer"),
   StdAppPath("wx")
